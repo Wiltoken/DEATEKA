@@ -41,6 +41,15 @@ favoritos.
 
 Acceso: `/admin`.
 
+### Iniciar sesión
+
+1. Entrá a `/login`.
+2. Ingresá el email y la contraseña del administrador.
+3. Serás redirigido al panel.
+
+Para **cerrar sesión**, usá el botón **Cerrar sesión** en la barra superior
+del panel.
+
 ### Dashboard
 
 Muestra estadísticas en tiempo real: cantidad de productos, ventas, órdenes y

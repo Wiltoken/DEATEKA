@@ -78,6 +78,29 @@ se sincronizan con la base de datos.
 `src/lib/prisma.ts` reutiliza una única instancia de `PrismaClient` durante el
 hot-reload de desarrollo, evitando conexiones duplicadas.
 
+### Autenticación
+
+La autenticación se basa en una **sesión firmada con JWT** en una cookie
+`httpOnly`. Componentes:
+
+| Archivo | Responsabilidad |
+|---------|-----------------|
+| `src/lib/auth-config.ts` | Nombre de la cookie y secreto (`AUTH_SECRET`) |
+| `src/lib/session.ts` | Firmar/verificar el token (JWT con `jose`) |
+| `src/lib/auth.ts` | Hash de contraseñas (`bcryptjs`), manejo de cookie y `requireAdmin` |
+| `src/lib/auth-actions.ts` | Server Actions `login` y `logout` |
+| `middleware.ts` | Protege `/admin/*` en el edge, redirige a `/login` |
+
+Flujo:
+
+1. El usuario envía email y contraseña a la Server Action `login`.
+2. `login` verifica la contraseña contra el hash (`bcrypt.compare`) y, si es
+   correcta, crea una cookie `httpOnly` con un JWT firmado.
+3. `middleware.ts` verifica el JWT en cada petición a `/admin/*`.
+4. `src/app/admin/layout.tsx` llama a `requireAdmin()` como segunda barrera.
+
+Las contraseñas se almacenan hasheadas con bcrypt (ver `prisma/seed.ts`).
+
 ## Modelo de datos
 
 | Modelo | Descripción | Relaciones |

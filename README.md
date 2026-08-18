@@ -30,7 +30,7 @@ Proyecto de e-commerce construido con **Next.js 16 (App Router)**, **TypeScript*
 npm install
 
 # 2. Configurar variables de entorno
-cp .env.example .env        # ajustar DATABASE_URL si hace falta
+cp .env.example .env        # ajustar DATABASE_URL y generar AUTH_SECRET
 
 # 3. Crear la base de datos y sembrar datos de ejemplo
 npm run db:migrate
@@ -58,10 +58,12 @@ Abrir <http://localhost:3000>.
 
 | Recurso | URL |
 |---------|-----|
+| Iniciar sesión | `/login` |
 | Panel | `/admin` |
 | Productos | `/admin/productos` |
 
-> El panel aún **no exige autenticación**. Ver *Manual técnico → Limitaciones*.
+El panel está protegido por autenticación. Usuario de demostración:
+`admin@deateka.com` / `cambiame123`.
 
 ## Documentación
 

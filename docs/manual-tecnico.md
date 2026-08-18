@@ -30,6 +30,7 @@ cp .env.example .env
 | Variable | Descripción | Ejemplo |
 |----------|-------------|---------|
 | `DATABASE_URL` | URL de la base de datos SQLite | `file:./dev.db` |
+| `AUTH_SECRET` | Secreto para firmar las sesiones | generá con `openssl rand -base64 32` |
 
 > La ruta de SQLite es **relativa a `prisma/schema.prisma`**. Con el valor por
 > defecto, la base se crea en `prisma/dev.db`.
@@ -56,8 +57,8 @@ El seed crea un usuario administrador:
 | Email | `admin@deateka.com` |
 | Contraseña | `cambiame123` |
 
-> La contraseña del seed es de demostración y **no** está hasheada. No usar en
-> producción.
+> La contraseña se almacena **hasheada con bcrypt**. El valor `cambiame123`
+> es solo de demostración: cambiala en producción.
 
 ## Ejecutar la aplicación
 
@@ -101,9 +102,7 @@ Estos puntos están pendientes y deben resolverse antes de un lanzamiento real:
 
 | Limitación | Impacto |
 |-----------|---------|
-| El panel `/admin` **no exige autenticación** | Cualquiera con la URL puede crear/editar/borrar productos |
 | El checkout **no crea pedidos** en la base de datos | El flujo de compra es simulado |
 | No hay pasarela de pago | Solo se muestra un resumen del pedido |
 | Los productos **no tienen imágenes reales** | Se muestran marcadores de posición |
 | Carrito y favoritos son **solo locales** | No se sincronizan entre dispositivos |
-| Contraseñas sin hashear | El `User.password` no usa hash |
