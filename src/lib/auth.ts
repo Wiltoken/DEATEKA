@@ -10,6 +10,15 @@ import {
   type SessionPayload,
 } from "@/lib/session";
 
+// Lazily-computed memoized dummy hash — computed once, promise cached
+let dummyHashPromise: Promise<string> | null = null;
+export async function getDummyHash(): Promise<string> {
+  if (!dummyHashPromise) {
+    dummyHashPromise = bcrypt.hash("dummy-password-for-timing-equity", 10);
+  }
+  return dummyHashPromise;
+}
+
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
 }
@@ -42,9 +51,17 @@ export async function destroySession(): Promise<void> {
   (await cookies()).delete(SESSION_COOKIE_NAME);
 }
 
+// Note: middleware cannot query the DB (runs at the edge), so it remains
+// signature/expiry-only verification. requireAdmin is the authoritative check.
 export async function requireAdmin(): Promise<SessionPayload> {
   const session = await getSession();
   if (!session || session.role !== "admin") {
+    redirect("/login");
+  }
+  // Authoritative check: verify tokenVersion matches DB (revocation check)
+  const { prisma } = await import("@/lib/prisma");
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
+  if (!user || user.tokenVersion !== session.tokenVersion) {
     redirect("/login");
   }
   return session;

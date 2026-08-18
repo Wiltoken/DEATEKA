@@ -46,3 +46,9 @@ next-env.d.ts
 # local sqlite database
 *.db
 *.db-journal
+
+# AI tooling
+.agents/
+.claude/
+.windsurf/
+skills-lock.json

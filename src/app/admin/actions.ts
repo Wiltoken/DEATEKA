@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
+import { requireAdmin } from "@/lib/auth";
 
 function getString(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -26,6 +27,8 @@ function nullable(value: string): string | null {
 }
 
 export async function saveProduct(formData: FormData) {
+  await requireAdmin();
+
   const id = getString(formData, "id");
   const name = getString(formData, "name").trim();
   const slug = getString(formData, "slug").trim() || slugify(name);
@@ -69,6 +72,8 @@ export async function saveProduct(formData: FormData) {
 }
 
 export async function deleteProduct(formData: FormData) {
+  await requireAdmin();
+
   const id = getString(formData, "id");
   if (!id) return;
 

@@ -302,11 +302,14 @@ async function main() {
     await prisma.product.create({ data: product });
   }
 
+  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@deateka.com";
+  const adminPassword = process.env.ADMIN_PASSWORD ?? "cambiame123";
+
   await prisma.user.create({
     data: {
       name: "Admin DEATEKA",
-      email: "admin@deateka.com",
-      password: bcrypt.hashSync("cambiame123", 10),
+      email: adminEmail,
+      password: bcrypt.hashSync(adminPassword, 10),
       role: "admin",
     },
   });
@@ -314,7 +317,7 @@ async function main() {
   console.log("Seed completado:");
   console.log(`  - ${products.length} productos`);
   console.log("  - Categorías: Muebles, Iluminación, Decoración, Exterior");
-  console.log("  - Admin: admin@deateka.com / cambiame123");
+  console.log(`  - Admin: ${adminEmail} (contraseña configurable vía ADMIN_PASSWORD)`);
 }
 
 main()
