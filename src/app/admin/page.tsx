@@ -30,12 +30,20 @@ export default async function AdminPage() {
           <h1 className="text-3xl font-bold">Panel de administración</h1>
           <p className="text-muted mt-1">Gestioná tu tienda</p>
         </div>
-        <Link
-          href="/admin/productos/nuevo"
-          className="bg-primary text-white px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors"
-        >
-          Nuevo producto
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/admin/productos"
+            className="border border-border px-5 py-2.5 text-sm font-medium hover:bg-border/30 transition-colors"
+          >
+            Ver productos
+          </Link>
+          <Link
+            href="/admin/productos/nuevo"
+            className="bg-primary text-white px-5 py-2.5 text-sm font-medium hover:bg-primary-dark transition-colors"
+          >
+            Nuevo producto
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">

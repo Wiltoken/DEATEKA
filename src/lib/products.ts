@@ -85,3 +85,10 @@ export function getRootCategories() {
     orderBy: { name: "asc" },
   });
 }
+
+export function getAllCategories() {
+  return prisma.category.findMany({
+    include: { parent: true },
+    orderBy: { name: "asc" },
+  });
+}
