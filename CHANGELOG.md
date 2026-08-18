@@ -33,3 +33,14 @@ y el proyecto adhiere a [SemVer](https://semver.org/).
 - Autenticación del panel de administración.
 - Creación de pedidos reales y pasarela de pago.
 - Carga de imágenes de producto.
+
+### Nota de seguridad
+
+- El panel de administración (`/admin`) **no exige autenticación**: cualquier
+  persona con la URL puede crear, editar o eliminar productos. Es de prioridad
+  crítica resolverlo antes de exponer el sitio en producción.
+- Las contraseñas del modelo `User` se almacenan **sin hashear**. Hay que
+  aplicar un hash (p. ej. bcrypt/argon2) antes de habilitar el login.
+- El usuario administrador de demostración (`admin@deateka.com`) usa la
+  contraseña `cambiame123` definida en el seed. Debe eliminarse o cambiarse en
+  producción.
