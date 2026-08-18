@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, CreditCard, Truck, ShieldCheck } from "lucide-react";
+import { ArrowRight, CreditCard, Truck, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
@@ -9,20 +9,7 @@ import { Button } from "@/components/ui/button";
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCartStore();
   const [step, setStep] = useState<"info" | "confirm">("info");
-
-  if (items.length === 0) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <p className="text-muted text-lg mb-4">No hay productos en tu carrito</p>
-        <Link
-          href="/productos"
-          className="text-primary hover:text-primary-dark transition-colors"
-        >
-          Ir a la tienda
-        </Link>
-      </div>
-    );
-  }
+  const [orderNumber, setOrderNumber] = useState("");
 
   if (step === "confirm") {
     return (
@@ -36,10 +23,24 @@ export default function CheckoutPage() {
           seguimiento de tu pedido.
         </p>
         <p className="text-sm text-muted mb-8">
-          Número de pedido: <span className="font-mono font-medium">#DEA-{Date.now().toString(36).toUpperCase()}</span>
+          Número de pedido: <span className="font-mono font-medium">#DEA-{orderNumber}</span>
         </p>
         <Link href="/" className="text-primary hover:text-primary-dark transition-colors font-medium">
           Volver al inicio
+        </Link>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+        <p className="text-muted text-lg mb-4">No hay productos en tu carrito</p>
+        <Link
+          href="/productos"
+          className="text-primary hover:text-primary-dark transition-colors"
+        >
+          Ir a la tienda
         </Link>
       </div>
     );
@@ -164,6 +165,7 @@ export default function CheckoutPage() {
               className="w-full mt-6"
               size="lg"
               onClick={() => {
+                setOrderNumber(Date.now().toString(36).toUpperCase());
                 clearCart();
                 setStep("confirm");
               }}

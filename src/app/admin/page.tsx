@@ -1,14 +1,28 @@
 import { Package, DollarSign, ShoppingCart, Users } from "lucide-react";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-const stats = [
-  { icon: Package, label: "Productos", value: "0" },
-  { icon: DollarSign, label: "Ventas", value: "$0" },
-  { icon: ShoppingCart, label: "Órdenes", value: "0" },
-  { icon: Users, label: "Clientes", value: "0" },
-];
+export default async function AdminPage() {
+  const [productCount, orderCount, customerCount, sales] = await Promise.all([
+    prisma.product.count(),
+    prisma.order.count(),
+    prisma.user.count({ where: { role: "customer" } }),
+    prisma.order.aggregate({ _sum: { total: true } }),
+  ]);
 
-export default function AdminPage() {
+  const totalSales = sales._sum.total ?? 0;
+
+  const stats = [
+    { icon: Package, label: "Productos", value: productCount.toLocaleString("es-CO") },
+    {
+      icon: DollarSign,
+      label: "Ventas",
+      value: `$${totalSales.toLocaleString("es-CO")}`,
+    },
+    { icon: ShoppingCart, label: "Órdenes", value: orderCount.toLocaleString("es-CO") },
+    { icon: Users, label: "Clientes", value: customerCount.toLocaleString("es-CO") },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="flex items-center justify-between mb-10">
@@ -26,10 +40,7 @@ export default function AdminPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="border border-border bg-card p-6"
-          >
+          <div key={stat.label} className="border border-border bg-card p-6">
             <stat.icon size={24} className="text-primary mb-3" />
             <p className="text-2xl font-bold">{stat.value}</p>
             <p className="text-sm text-muted">{stat.label}</p>
@@ -40,7 +51,9 @@ export default function AdminPage() {
       <div className="border border-border bg-card p-8 text-center">
         <h2 className="font-semibold text-lg mb-2">Productos</h2>
         <p className="text-muted mb-4">
-          No hay productos todavía. Empezá agregando el primero.
+          {productCount > 0
+            ? `Tenés ${productCount} productos en tu catálogo.`
+            : "No hay productos todavía. Empezá agregando el primero."}
         </p>
         <Link
           href="/admin/productos/nuevo"

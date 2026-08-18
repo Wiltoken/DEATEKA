@@ -1,28 +1,25 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { getPrimaryImageUrl, getProducts, getRootCategories } from "@/lib/products";
+import { ProductCard } from "@/components/products/product-card";
 
 type Props = {
   searchParams: Promise<{ categoria?: string; bestseller?: string; order?: string }>;
 };
 
-const categories = [
-  "Muebles",
-  "Iluminación",
-  "Decoración",
-  "Exterior",
-  "Habitaciones",
-  "Bestsellers",
-];
-
-const filters = [
-  { name: "Precio", options: ["$0 - $500.000", "$500.000 - $1.000.000", "$1.000.000+"] },
-  { name: "Color", options: ["Negro", "Blanco", "Madera", "Gris", "Beige"] },
-  { name: "Material", options: ["Madera", "Metal", "Vidrio", "Textil", "Mármol"] },
+const sortOptions = [
+  { value: "", label: "Más relevante" },
+  { value: "precio-asc", label: "Precio: menor a mayor" },
+  { value: "precio-desc", label: "Precio: mayor a menor" },
+  { value: "mas-nuevo", label: "Más nuevo" },
 ];
 
 export default async function ProductsPage({ searchParams }: Props) {
   const params = await searchParams;
   const activeCategory = params.categoria;
+  const [categories, products] = await Promise.all([
+    getRootCategories(),
+    getProducts(params),
+  ]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -32,7 +29,9 @@ export default async function ProductsPage({ searchParams }: Props) {
         </Link>
         <span>/</span>
         <span className="text-foreground">
-          {activeCategory ? activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1) : "Tienda"}
+          {activeCategory
+            ? activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)
+            : "Tienda"}
         </span>
       </div>
 
@@ -56,63 +55,92 @@ export default async function ProductsPage({ searchParams }: Props) {
                 <Link
                   href="/productos"
                   className={`text-sm block py-1 transition-colors ${
-                    !activeCategory ? "text-primary font-medium" : "text-muted hover:text-foreground"
+                    !activeCategory
+                      ? "text-primary font-medium"
+                      : "text-muted hover:text-foreground"
                   }`}
                 >
                   Todos
                 </Link>
               </li>
               {categories.map((cat) => (
-                <li key={cat}>
+                <li key={cat.slug}>
                   <Link
-                    href={`/productos?categoria=${cat.toLowerCase()}`}
+                    href={`/productos?categoria=${cat.slug}`}
                     className={`text-sm block py-1 transition-colors ${
-                      activeCategory === cat.toLowerCase()
+                      activeCategory === cat.slug
                         ? "text-primary font-medium"
                         : "text-muted hover:text-foreground"
                     }`}
                   >
-                    {cat}
+                    {cat.name}
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/productos?bestseller=true"
+                  className={`text-sm block py-1 transition-colors ${
+                    params.bestseller === "true"
+                      ? "text-primary font-medium"
+                      : "text-muted hover:text-foreground"
+                  }`}
+                >
+                  Bestsellers
+                </Link>
+              </li>
             </ul>
           </div>
-
-          {filters.map((filter) => (
-            <div key={filter.name} className="border border-border border-t-0 p-6 bg-card">
-              <h3 className="font-semibold mb-4">{filter.name}</h3>
-              <ul className="space-y-2">
-                {filter.options.map((opt) => (
-                  <li key={opt}>
-                    <label className="flex items-center gap-2 text-sm text-muted cursor-pointer hover:text-foreground transition-colors">
-                      <input type="checkbox" className="accent-primary" />
-                      {opt}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
         </aside>
 
         <div className="flex-1">
           <div className="flex items-center justify-between mb-8">
-            <p className="text-sm text-muted">0 productos</p>
-            <select className="text-sm border border-border bg-card px-3 py-2 outline-none">
-              <option>Más relevante</option>
-              <option>Precio: menor a mayor</option>
-              <option>Precio: mayor a menor</option>
-              <option>Más nuevo</option>
-            </select>
+            <p className="text-sm text-muted">{products.length} productos</p>
+            <form method="GET" action="/productos" className="flex items-center gap-2">
+              {activeCategory && (
+                <input type="hidden" name="categoria" value={activeCategory} />
+              )}
+              {params.bestseller === "true" && (
+                <input type="hidden" name="bestseller" value="true" />
+              )}
+              <select
+                name="order"
+                defaultValue={params.order ?? ""}
+                className="text-sm border border-border bg-card px-3 py-2 outline-none"
+              >
+                {sortOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </form>
           </div>
 
-          <div className="text-center py-20 border border-border bg-card">
-            <p className="text-muted text-lg mb-2">No hay productos todavía</p>
-            <p className="text-sm text-muted">
-              Pronto vas a poder ver nuestra colección completa acá.
-            </p>
-          </div>
+          {products.length === 0 ? (
+            <div className="text-center py-20 border border-border bg-card">
+              <p className="text-muted text-lg mb-2">No hay productos todavía</p>
+              <p className="text-sm text-muted">
+                Probá con otra categoría o volvé más tarde.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  slug={product.slug}
+                  price={product.price}
+                  compareAt={product.compareAt}
+                  image={getPrimaryImageUrl(product.images)}
+                  category={product.category.name}
+                  isNew={product.isNew}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
