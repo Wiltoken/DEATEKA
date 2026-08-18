@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("customer")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders      Order[]
+  wishlist    WishlistItem[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  parentId    String?
+  parent      Category? @relation("CategoryTree", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryTree")
+  createdAt   DateTime  @default(now())
+
+  products Product[]
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String
+  price        Float
+  compareAt    Float?
+  stock        Int      @default(0)
+  isFeatured   Boolean  @default(false)
+  isNew        Boolean  @default(false)
+  isBestSeller Boolean  @default(false)
+  color        String?
+  material     String?
+  dimensions   String?
+  weight       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  images      ProductImage[]
+  orderItems  OrderItem[]
+  wishlist    WishlistItem[]
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  status    String    @default("pending")
+  total     Float
+  address   String
+  city      String
+  phone     String
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  price     Float
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
