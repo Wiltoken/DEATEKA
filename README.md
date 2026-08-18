@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DEATEKA
 
-## Getting Started
+Tienda en línea de muebles, iluminación y decoración con diseño único.
+Proyecto de e-commerce construido con **Next.js 16 (App Router)**, **TypeScript**,
+**Tailwind CSS v4**, **Prisma** y **Zustand**.
 
-First, run the development server:
+> **Estado:** MVP funcional. Catálogo, carrito y panel de administración
+> operativos. Pendientes destacados: autenticación del panel y pago real.
+
+## Stack
+
+| Capa | Tecnología |
+|------|-----------|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| Lenguaje | TypeScript 5 |
+| UI / estilos | React 19 + Tailwind CSS v4 |
+| ORM / base de datos | Prisma 5 + SQLite |
+| Estado (cliente) | Zustand 5 (carrito y favoritos) |
+| Iconos | lucide-react |
+
+## Requisitos
+
+- Node.js 20.9 o superior (probado con Node 22)
+- npm 10+
+
+## Puesta en marcha
 
 ```bash
+# 1. Instalar dependencias
+npm install
+
+# 2. Configurar variables de entorno
+cp .env.example .env        # ajustar DATABASE_URL si hace falta
+
+# 3. Crear la base de datos y sembrar datos de ejemplo
+npm run db:migrate
+npm run db:seed
+
+# 4. Levantar en desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run start` | Servidor de producción (requiere build previo) |
+| `npm run lint` | ESLint |
+| `npm run db:migrate` | Aplica migraciones de Prisma |
+| `npm run db:seed` | Sembra datos de ejemplo |
+| `npm run db:studio` | Abre Prisma Studio |
 
-## Learn More
+## Acceso de administración
 
-To learn more about Next.js, take a look at the following resources:
+| Recurso | URL |
+|---------|-----|
+| Panel | `/admin` |
+| Productos | `/admin/productos` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> El panel aún **no exige autenticación**. Ver *Manual técnico → Limitaciones*.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Documentación
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Documento | Contenido |
+|-----------|-----------|
+| [Arquitectura](docs/arquitectura.md) | Diseño técnico, estructura y modelo de datos |
+| [Manual técnico](docs/manual-tecnico.md) | Instalación, configuración y despliegue |
+| [Manual de usuario](docs/manual-usuario.md) | Uso de la tienda y del panel de administración |
+| [Control de versiones](docs/control-de-versiones.md) | Flujo Git, ramas y convenciones |
+| [CHANGELOG](CHANGELOG.md) | Historial de versiones |
