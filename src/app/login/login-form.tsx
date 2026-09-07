@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { loginForClient } from "@/lib/auth-actions";
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +10,6 @@ const field =
 export default function LoginForm({ from }: { from?: string }) {
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,8 +22,8 @@ export default function LoginForm({ from }: { from?: string }) {
       if (!result.success) {
         setError(result.error);
       } else {
-        router.push(result.redirectTo);
-        router.refresh();
+        // Full page reload — ensures middleware picks up the new cookie cleanly
+        window.location.href = result.redirectTo;
       }
     });
   }

@@ -13,7 +13,9 @@ const field =
 const initialOrderState: OrderState = { error: "", success: false, orderId: "" };
 
 export default function CheckoutPage() {
-  const { items, totalPrice, clearCart } = useCartStore();
+  const items = useCartStore((s) => s.items);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const totalPrice = useCartStore((s) => s.items.reduce((sum, i) => sum + i.price * i.quantity, 0));
   const [state, formAction, pending] = useActionState(createOrder, initialOrderState);
 
   useEffect(() => {
@@ -170,7 +172,7 @@ export default function CheckoutPage() {
               <div className="border-t border-border pt-4 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted">Subtotal</span>
-                  <span>${totalPrice().toLocaleString("es-CO")}</span>
+                  <span>${totalPrice.toLocaleString("es-CO")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted">Envío</span>
@@ -179,7 +181,7 @@ export default function CheckoutPage() {
               </div>
               <div className="border-t border-border mt-4 pt-4 flex justify-between font-semibold">
                 <span>Total</span>
-                <span>${totalPrice().toLocaleString("es-CO")}</span>
+                <span>${totalPrice.toLocaleString("es-CO")}</span>
               </div>
 
               <div className="mt-6 space-y-3 text-xs text-muted">

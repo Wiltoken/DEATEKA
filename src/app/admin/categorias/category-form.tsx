@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { saveCategory } from "@/app/admin/actions";
 
 const field =
@@ -30,7 +29,6 @@ export function CategoryForm({
   const isEdit = !!category?.id;
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
-  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -44,12 +42,10 @@ export function CategoryForm({
         if (result?.error) {
           setError(result.error);
         } else {
-          router.push("/admin/categorias");
-          router.refresh();
+          window.location.href = "/admin/categorias";
         }
       } catch {
-        router.push("/admin/categorias");
-        router.refresh();
+        window.location.href = "/admin/categorias";
       }
     });
   }
