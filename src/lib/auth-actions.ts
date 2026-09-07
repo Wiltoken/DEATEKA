@@ -106,6 +106,68 @@ export async function login(
 }
 
 // ---------------------------------------------------------------------------
+// Login for client-side forms — same logic, NO redirect (client handles it)
+// ---------------------------------------------------------------------------
+export type LoginClientResult = { error: string; success: false } | { error: ""; success: true; redirectTo: string };
+
+export async function loginForClient(formData: FormData): Promise<LoginClientResult> {
+  // 1. Cheap validation first
+  const rawEmail = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  if (!rawEmail || !password) {
+    return { error: "Ingresá tu email y contraseña.", success: false };
+  }
+  const email = rawEmail.toLowerCase();
+
+  // 2. Email-keyed rate limit
+  const emailKey = `login:email:${email}`;
+  const emailLimit = checkRateLimit(emailKey, 5);
+  if (!emailLimit.allowed) {
+    const mins = Math.max(1, Math.ceil(emailLimit.retryAfterMs / 60_000));
+    return { error: `Demasiados intentos. Intentá de nuevo en ${mins} min.`, success: false };
+  }
+
+  // 3. Best-effort IP throttle
+  const trustProxy = process.env.TRUST_PROXY === "true";
+  const rawIP = trustProxy ? await getClientIP() : "";
+  const isPlausibleIP = rawIP !== "" && rawIP !== "unknown" && /^[\d.:a-f]+$/i.test(rawIP);
+  const ipKey = `login:ip:${rawIP}`;
+  if (isPlausibleIP) {
+    const ipLimit = checkRateLimit(ipKey, 15);
+    if (!ipLimit.allowed) {
+      const mins = Math.max(1, Math.ceil(ipLimit.retryAfterMs / 60_000));
+      return { error: `Demasiados intentos. Intentá de nuevo en ${mins} min.`, success: false };
+    }
+  }
+
+  // 4. Fetch user; ALWAYS run bcrypt.compare (timing equity)
+  const user = await prisma.user.findUnique({ where: { email } });
+  const hash = user ? user.password : await getDummyHash();
+  const valid = await verifyPassword(password, hash);
+
+  if (!valid || !user) {
+    recordFailure(emailKey, 15 * 60 * 1000);
+    if (isPlausibleIP) recordFailure(ipKey, 15 * 60 * 1000);
+    return { error: "Credenciales inválidas.", success: false };
+  }
+
+  // 5. On success: clear both buckets
+  clearRateLimit(emailKey);
+  if (isPlausibleIP) clearRateLimit(ipKey);
+
+  // 6. Create session (NO redirect — client handles it)
+  await createSession({
+    userId: user.id,
+    role: user.role,
+    name: user.name,
+    tokenVersion: user.tokenVersion,
+  });
+
+  const from = String(formData.get("from") ?? "").trim();
+  return { error: "", success: true, redirectTo: safeRedirectFrom(from) };
+}
+
+// ---------------------------------------------------------------------------
 // Logout — W3: updateMany instead of update to avoid P2025 on deleted user
 // ---------------------------------------------------------------------------
 export async function logout(): Promise<void> {

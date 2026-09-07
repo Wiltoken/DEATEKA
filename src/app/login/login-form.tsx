@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/auth-actions";
+import { loginForClient } from "@/lib/auth-actions";
 import { Button } from "@/components/ui/button";
 
 const field =
@@ -20,16 +20,11 @@ export default function LoginForm({ from }: { from?: string }) {
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      try {
-        const result = await login(undefined as never, formData);
-        if (result?.error) {
-          setError(result.error);
-        } else {
-          router.push(from || "/admin");
-          router.refresh();
-        }
-      } catch {
-        router.push(from || "/admin");
+      const result = await loginForClient(formData);
+      if (!result.success) {
+        setError(result.error);
+      } else {
+        router.push(result.redirectTo);
         router.refresh();
       }
     });
