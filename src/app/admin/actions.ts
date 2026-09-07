@@ -11,6 +11,10 @@ function getString(formData: FormData, key: string): string {
   return typeof value === "string" ? value : "";
 }
 
+export type CategoryState = {
+  error: string;
+};
+
 function getNumber(formData: FormData, key: string): number | null {
   const raw = getString(formData, key);
   if (raw === "") return null;
@@ -82,4 +86,59 @@ export async function deleteProduct(formData: FormData) {
   revalidatePath("/admin/productos");
   revalidatePath("/productos");
   revalidatePath("/");
+}
+
+export async function updateOrderStatus(orderId: string, status: string) {
+  await requireAdmin();
+
+  await prisma.order.update({
+    where: { id: orderId },
+    data: { status },
+  });
+
+  revalidatePath(`/admin/ordenes/${orderId}`);
+  revalidatePath("/admin/ordenes");
+}
+
+export async function saveCategory(formData: FormData) {
+  await requireAdmin();
+
+  const id = getString(formData, "id");
+  const name = getString(formData, "name").trim();
+  const slug = getString(formData, "slug").trim() || slugify(name);
+  const description = nullable(getString(formData, "description"));
+  const parentId = getString(formData, "parentId") || null;
+
+  if (!name) {
+    throw new Error("El nombre es obligatorio.");
+  }
+
+  const data = { name, slug, description, parentId };
+
+  if (id) {
+    await prisma.category.update({ where: { id }, data });
+  } else {
+    await prisma.category.create({ data });
+  }
+
+  revalidatePath("/admin/categorias");
+  revalidatePath("/admin");
+  redirect("/admin/categorias");
+}
+
+export async function deleteCategory(formData: FormData) {
+  await requireAdmin();
+
+  const id = getString(formData, "id");
+  if (!id) return;
+
+  const productCount = await prisma.product.count({ where: { categoryId: id } });
+  if (productCount > 0) {
+    throw new Error("No se puede eliminar una categoría con productos.");
+  }
+
+  await prisma.category.delete({ where: { id } });
+
+  revalidatePath("/admin/categorias");
+  revalidatePath("/admin");
 }

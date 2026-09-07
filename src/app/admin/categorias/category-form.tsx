@@ -1,0 +1,101 @@
+"use client";
+
+import { useActionState } from "react";
+import { saveCategory, type CategoryState } from "@/app/admin/actions";
+import { Button } from "@/components/ui/button";
+
+const field =
+  "w-full border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors";
+
+type Category = {
+  id?: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  parentId: string | null;
+};
+
+type ParentCategory = {
+  id: string;
+  name: string;
+};
+
+const initialState: CategoryState = { error: "" };
+
+export function CategoryForm({
+  category,
+  parentCategories,
+}: {
+  category?: Category;
+  parentCategories: ParentCategory[];
+}) {
+  const [state, formAction, pending] = useActionState(saveCategory, initialState);
+  const isEdit = !!category?.id;
+
+  return (
+    <form action={formAction} className="space-y-6">
+      {category?.id && <input type="hidden" name="id" value={category.id} />}
+      {state.error && <p className="text-red-600 text-sm">{state.error}</p>}
+
+      <div>
+        <label className="block text-sm mb-1">Nombre *</label>
+        <input
+          name="name"
+          type="text"
+          required
+          defaultValue={category?.name ?? ""}
+          className={field}
+          placeholder="Nombre de la categoría"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">Slug</label>
+        <input
+          name="slug"
+          type="text"
+          defaultValue={category?.slug ?? ""}
+          className={field}
+          placeholder="Se genera automáticamente si se deja vacío"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">Descripción</label>
+        <input
+          name="description"
+          type="text"
+          defaultValue={category?.description ?? ""}
+          className={field}
+          placeholder="Descripción opcional"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm mb-1">Categoría padre</label>
+        <select
+          name="parentId"
+          defaultValue={category?.parentId ?? ""}
+          className={field}
+        >
+          <option value="">Ninguna (categoría raíz)</option>
+          {parentCategories.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="flex gap-3">
+        <Button type="submit" disabled={pending}>
+          {pending ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear categoría"}
+        </Button>
+        <a
+          href="/admin/categorias"
+          className="border border-border px-5 py-2.5 text-sm hover:bg-card transition-colors"
+        >
+          Cancelar
+        </a>
+      </div>
+    </form>
+  );
+}
