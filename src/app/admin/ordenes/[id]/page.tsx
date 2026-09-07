@@ -23,7 +23,7 @@ export default async function OrderDetailPage({ params }: Props) {
   const order = await prisma.order.findUnique({
     where: { id },
     include: {
-      user: { select: { name: true, email: true, phone: true } },
+      user: { select: { name: true, email: true } },
       items: {
         include: { product: { select: { name: true, slug: true, images: { where: { isPrimary: true }, take: 1 } } } },
       },
@@ -106,7 +106,6 @@ export default async function OrderDetailPage({ params }: Props) {
             <div className="space-y-2 text-sm">
               <p><span className="text-muted">Nombre:</span> {order.user.name}</p>
               <p><span className="text-muted">Email:</span> {order.user.email}</p>
-              {order.user.phone && <p><span className="text-muted">Teléfono:</span> {order.user.phone}</p>}
             </div>
           </div>
 

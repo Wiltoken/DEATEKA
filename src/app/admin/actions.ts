@@ -100,7 +100,10 @@ export async function updateOrderStatus(orderId: string, status: string) {
   revalidatePath("/admin/ordenes");
 }
 
-export async function saveCategory(formData: FormData) {
+export async function saveCategory(
+  _prevState: CategoryState,
+  formData: FormData
+): Promise<CategoryState> {
   await requireAdmin();
 
   const id = getString(formData, "id");
@@ -110,15 +113,19 @@ export async function saveCategory(formData: FormData) {
   const parentId = getString(formData, "parentId") || null;
 
   if (!name) {
-    throw new Error("El nombre es obligatorio.");
+    return { error: "El nombre es obligatorio." };
   }
 
   const data = { name, slug, description, parentId };
 
-  if (id) {
-    await prisma.category.update({ where: { id }, data });
-  } else {
-    await prisma.category.create({ data });
+  try {
+    if (id) {
+      await prisma.category.update({ where: { id }, data });
+    } else {
+      await prisma.category.create({ data });
+    }
+  } catch (e) {
+    return { error: "Error al guardar la categoría. Verificá que el slug sea único." };
   }
 
   revalidatePath("/admin/categorias");
