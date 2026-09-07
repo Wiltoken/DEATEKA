@@ -1,4 +1,4 @@
-import { unstable_cache, revalidateTag } from "next/cache";
+import { unstable_cache, revalidatePath } from "next/cache";
 import { Prisma, type ProductImage } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
@@ -7,7 +7,8 @@ export function getPrimaryImageUrl(images: ProductImage[]): string {
 }
 
 export function revalidateProducts() {
-  revalidateTag("products");
+  revalidatePath("/productos");
+  revalidatePath("/");
 }
 
 const productInclude = {
