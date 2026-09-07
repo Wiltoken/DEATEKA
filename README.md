@@ -74,3 +74,4 @@ El panel está protegido por autenticación. Usuario de demostración:
 | [Manual de usuario](docs/manual-usuario.md) | Uso de la tienda y del panel de administración |
 | [Control de versiones](docs/control-de-versiones.md) | Flujo Git, ramas y convenciones |
 | [CHANGELOG](CHANGELOG.md) | Historial de versiones |
+// trigger redeploy
