@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Heart, Minus, Plus, Share2 } from "lucide-react";
 import { useState } from "react";
 import { useCartStore } from "@/store/cart";
@@ -39,13 +40,15 @@ export function ProductDetail({ product }: { product: DetailProduct }) {
       </Link>
 
       <div className="grid md:grid-cols-2 gap-12">
-        <div className="aspect-square bg-border/20 flex items-center justify-center text-muted">
+        <div className="aspect-square bg-border/20 flex items-center justify-center text-muted relative">
           {product.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+              priority
             />
           ) : (
             "[Imagen del producto]"

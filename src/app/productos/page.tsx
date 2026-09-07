@@ -3,7 +3,7 @@ import { getPrimaryImageUrl, getProducts, getRootCategories } from "@/lib/produc
 import { ProductCard } from "@/components/products/product-card";
 
 type Props = {
-  searchParams: Promise<{ categoria?: string; bestseller?: string; order?: string }>;
+  searchParams: Promise<{ categoria?: string; bestseller?: string; order?: string; page?: string }>;
 };
 
 const sortOptions = [
@@ -16,10 +16,24 @@ const sortOptions = [
 export default async function ProductsPage({ searchParams }: Props) {
   const params = await searchParams;
   const activeCategory = params.categoria;
-  const [categories, products] = await Promise.all([
+  const page = params.page ? parseInt(params.page, 10) : 1;
+
+  const [categories, result] = await Promise.all([
     getRootCategories(),
-    getProducts(params),
+    getProducts({ ...params, page }),
   ]);
+
+  const { products, pagination } = result;
+
+  function buildPageUrl(p: number) {
+    const sp = new URLSearchParams();
+    if (activeCategory) sp.set("categoria", activeCategory);
+    if (params.bestseller === "true") sp.set("bestseller", "true");
+    if (params.order) sp.set("order", params.order);
+    if (p > 1) sp.set("page", String(p));
+    const qs = sp.toString();
+    return `/productos${qs ? `?${qs}` : ""}`;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -95,7 +109,7 @@ export default async function ProductsPage({ searchParams }: Props) {
 
         <div className="flex-1">
           <div className="flex items-center justify-between mb-8">
-            <p className="text-sm text-muted">{products.length} productos</p>
+            <p className="text-sm text-muted">{pagination.total} productos</p>
             <form method="GET" action="/productos" className="flex items-center gap-2">
               {activeCategory && (
                 <input type="hidden" name="categoria" value={activeCategory} />
@@ -125,21 +139,70 @@ export default async function ProductsPage({ searchParams }: Props) {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  slug={product.slug}
-                  price={product.price}
-                  compareAt={product.compareAt}
-                  image={getPrimaryImageUrl(product.images)}
-                  category={product.category.name}
-                  isNew={product.isNew}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    slug={product.slug}
+                    price={product.price}
+                    compareAt={product.compareAt}
+                    image={getPrimaryImageUrl(product.images)}
+                    category={product.category.name}
+                    isNew={product.isNew}
+                  />
+                ))}
+              </div>
+
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-10">
+                  {page > 1 && (
+                    <Link
+                      href={buildPageUrl(page - 1)}
+                      className="border border-border px-4 py-2 text-sm hover:bg-card transition-colors"
+                    >
+                      Anterior
+                    </Link>
+                  )}
+                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                    .filter((p) => Math.abs(p - page) <= 2 || p === 1 || p === pagination.totalPages)
+                    .reduce<(number | "...")[]>((acc, p, i, arr) => {
+                      if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+                      acc.push(p);
+                      return acc;
+                    }, [])
+                    .map((p, i) =>
+                      p === "..." ? (
+                        <span key={`dots-${i}`} className="px-2 text-muted">
+                          ...
+                        </span>
+                      ) : (
+                        <Link
+                          key={p}
+                          href={buildPageUrl(p as number)}
+                          className={`px-4 py-2 text-sm border transition-colors ${
+                            p === page
+                              ? "bg-primary text-white border-primary"
+                              : "border-border hover:bg-card"
+                          }`}
+                        >
+                          {p}
+                        </Link>
+                      )
+                    )}
+                  {page < pagination.totalPages && (
+                    <Link
+                      href={buildPageUrl(page + 1)}
+                      className="border border-border px-4 py-2 text-sm hover:bg-card transition-colors"
+                    >
+                      Siguiente
+                    </Link>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

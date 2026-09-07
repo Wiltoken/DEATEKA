@@ -68,6 +68,7 @@ async function main() {
     },
   });
 
+  const sofas = await prisma.category.findUniqueOrThrow({ where: { slug: "sofas" } });
   const mesas = await prisma.category.findUniqueOrThrow({ where: { slug: "mesas" } });
   const sillas = await prisma.category.findUniqueOrThrow({ where: { slug: "sillas" } });
   const camas = await prisma.category.findUniqueOrThrow({ where: { slug: "camas" } });
@@ -79,7 +80,7 @@ async function main() {
   const floreros = await prisma.category.findUniqueOrThrow({ where: { slug: "floreros" } });
   const lamparasMesa = await prisma.category.findUniqueOrThrow({ where: { slug: "lamparas-mesa" } });
 
-  const products = [
+  const productData = [
     {
       name: "Sofá Milano",
       slug: "sofa-milano",
@@ -92,7 +93,8 @@ async function main() {
       color: "Verde botella",
       material: "Terciopelo / Metal",
       dimensions: "220×90×85 cm",
-      categoryId: muebles.id,
+      categoryId: sofas.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800", alt: "Sofá Milano", isPrimary: true, order: 0 }] },
     },
     {
       name: "Mesa de centro Koi",
@@ -108,6 +110,7 @@ async function main() {
       material: "Mármol / Acero",
       dimensions: "Ø100×40 cm",
       categoryId: mesas.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800", alt: "Mesa de centro Koi", isPrimary: true, order: 0 }] },
     },
     {
       name: "Silla Eclipse",
@@ -122,6 +125,7 @@ async function main() {
       material: "Lino / Fresno",
       dimensions: "48×52×82 cm",
       categoryId: sillas.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1503602642458-232111445657?w=800", alt: "Silla Eclipse", isPrimary: true, order: 0 }] },
     },
     {
       name: "Cama Serenity",
@@ -137,6 +141,7 @@ async function main() {
       material: "Lino / Roble macizo",
       dimensions: "170×210×110 cm",
       categoryId: camas.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800", alt: "Cama Serenity", isPrimary: true, order: 0 }] },
     },
     {
       name: "Lámpara de pie Atlas",
@@ -151,6 +156,7 @@ async function main() {
       material: "Latón / Lino",
       dimensions: "Ø45×180 cm",
       categoryId: lamparasPie.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=800", alt: "Lámpara de pie Atlas", isPrimary: true, order: 0 }] },
     },
     {
       name: "Lámpara colgante Nova",
@@ -166,6 +172,7 @@ async function main() {
       material: "Vidrio / Bronce",
       dimensions: "Ø80×150 cm",
       categoryId: lamparasTecho.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1524484485831-a92ffc0de03f?w=800", alt: "Lámpara colgante Nova", isPrimary: true, order: 0 }] },
     },
     {
       name: "Espejo Arco",
@@ -180,6 +187,7 @@ async function main() {
       material: "Vidrio / Metal",
       dimensions: "80×180×4 cm",
       categoryId: espejos.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=800", alt: "Espejo Arco", isPrimary: true, order: 0 }] },
     },
     {
       name: "Alfombra Berbería",
@@ -195,6 +203,7 @@ async function main() {
       material: "Lana virgen",
       dimensions: "200×300 cm",
       categoryId: alfombras.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1600166898405-da9535204843?w=800", alt: "Alfombra Berbería", isPrimary: true, order: 0 }] },
     },
     {
       name: "Mesa de comedor Oslo",
@@ -209,6 +218,7 @@ async function main() {
       material: "Roble macizo",
       dimensions: "200×100×76 cm",
       categoryId: mesas.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800", alt: "Mesa de comedor Oslo", isPrimary: true, order: 0 }] },
     },
     {
       name: "Sofá Terrace",
@@ -223,6 +233,7 @@ async function main() {
       material: "Ratán sintético / Textil impermeable",
       dimensions: "280×180×75 cm",
       categoryId: exterior.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=800", alt: "Sofá Terrace", isPrimary: true, order: 0 }] },
     },
     {
       name: "Cuadro Abstracto Horizonte",
@@ -237,6 +248,7 @@ async function main() {
       material: "Lienzo / Técnica mixta",
       dimensions: "120×80 cm",
       categoryId: cuadros.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800", alt: "Cuadro Abstracto Horizonte", isPrimary: true, order: 0 }] },
     },
     {
       name: "Florero Terra",
@@ -252,6 +264,7 @@ async function main() {
       material: "Cerámica esmaltada",
       dimensions: "Ø25×45 cm",
       categoryId: floreros.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1612198188851-a0edf15c9b28?w=800", alt: "Florero Terra", isPrimary: true, order: 0 }] },
     },
     {
       name: "Lámpara de mesa Moon",
@@ -266,6 +279,7 @@ async function main() {
       material: "Mármol / Vidrio opalino",
       dimensions: "Ø20×35 cm",
       categoryId: lamparasMesa.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=800", alt: "Lámpara de mesa Moon", isPrimary: true, order: 0 }] },
     },
     {
       name: "Escritorio Minimal",
@@ -280,6 +294,7 @@ async function main() {
       material: "Nogal macizo",
       dimensions: "140×55×12 cm",
       categoryId: muebles.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800", alt: "Escritorio Minimal", isPrimary: true, order: 0 }] },
     },
     {
       name: "Silla Lounge Palermo",
@@ -295,10 +310,11 @@ async function main() {
       material: "Bouclé / Metal",
       dimensions: "85×80×95 cm",
       categoryId: muebles.id,
+      images: { create: [{ url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800", alt: "Silla Lounge Palermo", isPrimary: true, order: 0 }] },
     },
   ];
 
-  for (const product of products) {
+  for (const product of productData) {
     await prisma.product.create({ data: product });
   }
 
@@ -315,7 +331,7 @@ async function main() {
   });
 
   console.log("Seed completado:");
-  console.log(`  - ${products.length} productos`);
+  console.log(`  - ${productData.length} productos con imágenes de Unsplash`);
   console.log("  - Categorías: Muebles, Iluminación, Decoración, Exterior");
   console.log(`  - Admin: ${adminEmail} (contraseña configurable vía ADMIN_PASSWORD)`);
 }
