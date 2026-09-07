@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import { saveCategory, type CategoryState } from "@/app/admin/actions";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { saveCategory } from "@/app/admin/actions";
 
 const field =
   "w-full border border-border bg-card px-4 py-2.5 text-sm outline-none focus:border-primary transition-colors";
@@ -19,8 +20,6 @@ type ParentCategory = {
   name: string;
 };
 
-const initialState: CategoryState = { error: "" };
-
 export function CategoryForm({
   category,
   parentCategories,
@@ -29,12 +28,36 @@ export function CategoryForm({
   parentCategories: ParentCategory[];
 }) {
   const isEdit = !!category?.id;
-  const [state, formAction, pending] = useActionState(saveCategory, initialState);
+  const [error, setError] = useState("");
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+
+    startTransition(async () => {
+      try {
+        const result = await saveCategory(undefined as never, formData);
+        if (result?.error) {
+          setError(result.error);
+        } else {
+          router.push("/admin/categorias");
+          router.refresh();
+        }
+      } catch {
+        router.push("/admin/categorias");
+        router.refresh();
+      }
+    });
+  }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {category?.id && <input type="hidden" name="id" value={category.id} />}
-      {state.error && <p className="text-red-600 text-sm">{state.error}</p>}
+      {error && <p className="text-red-600 text-sm">{error}</p>}
 
       <div>
         <label className="block text-sm mb-1">Nombre *</label>

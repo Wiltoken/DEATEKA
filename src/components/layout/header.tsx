@@ -16,7 +16,7 @@ const categories = [
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const totalItems = useCartStore((s) => s.totalItems());
+  const totalItems = useCartStore((s) => s.items.reduce((sum, i) => sum + i.quantity, 0));
 
   return (
     <header className="sticky top-0 z-50 bg-card border-b border-border">

@@ -15,7 +15,10 @@ export default function CartPage() {
 }
 
 function CartContent() {
-  const { items, removeItem, updateQuantity, totalPrice } = useCartStore();
+  const items = useCartStore((s) => s.items);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const totalPrice = useCartStore((s) => s.items.reduce((sum, i) => sum + i.price * i.quantity, 0));
   const isClient = typeof window !== "undefined";
 
   if (!isClient || items.length === 0) {
@@ -90,7 +93,7 @@ function CartContent() {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted">Subtotal</span>
-            <span>${totalPrice().toLocaleString("es-CO")}</span>
+            <span>${totalPrice.toLocaleString("es-CO")}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted">Envío</span>
@@ -99,7 +102,7 @@ function CartContent() {
         </div>
         <div className="border-t border-border mt-4 pt-4 flex justify-between font-semibold">
           <span>Total</span>
-          <span>${totalPrice().toLocaleString("es-CO")}</span>
+          <span>${totalPrice.toLocaleString("es-CO")}</span>
         </div>
         <Link href="/checkout" className="block mt-6">
           <Button className="w-full">
