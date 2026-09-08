@@ -18,12 +18,15 @@ export default function LoginForm({ from }: { from?: string }) {
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const result = await loginForClient(formData);
-      if (!result.success) {
-        setError(result.error);
-      } else {
-        // Full page reload — ensures middleware picks up the new cookie cleanly
-        window.location.href = result.redirectTo;
+      try {
+        const result = await loginForClient(formData);
+        if (!result.success) {
+          setError(result.error);
+        } else {
+          window.location.href = result.redirectTo;
+        }
+      } catch {
+        setError("Error de conexión. Intentá de nuevo.");
       }
     });
   }
